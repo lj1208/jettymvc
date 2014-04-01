@@ -12,6 +12,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,13 +21,15 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @EnableWebMvc
 @Configuration
 @ComponentScan(basePackages={"com.bigrhyme.jetty"})
 @PropertySource("classpath:app.properties")
 @Controller
-public class App 
+public class App  extends WebMvcConfigurerAdapter 
 {
     private static final Logger log = Logger.getLogger(App.class);
 
@@ -52,6 +55,7 @@ public class App
         contextHandler.setContextPath("/");
         contextHandler.addServlet(new ServletHolder(new DispatcherServlet(ctx)), "/");
         contextHandler.addEventListener(new ContextLoaderListener(ctx));
+        contextHandler.setResourceBase(new ClassPathResource("webapp").getURI().toString());
         return contextHandler;
     }
 
@@ -61,5 +65,10 @@ public class App
 	public String home(HttpServletRequest request,
 			HttpServletResponse response) {
     	return "hello " + request.getRemoteAddr();
+    }
+    
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("images/**").addResourceLocations("images/");
     }
 }
